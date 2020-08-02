@@ -29,7 +29,7 @@ var line = d3.line()
 var purpMap = {};
 
 d3.csv("skyscrapers-count.csv", type, function(error, data) {
-  if (error) throw error;
+  //if (error) throw error;
 
   var purposes = data.columns.slice(1).map(function(id) {
     return {
