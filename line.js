@@ -1,385 +1,198 @@
- margin = {top: 50, right: 100, bottom: 50, left: 50},
-    width = 1000 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+function makeLineChart(dataset, xName, yObjs, axisLables) {
+    var chartObj = {};
+    var color = d3.scale.category10();
+    chartObj.xAxisLable = axisLables.xAxis;
+    chartObj.yAxisLable = axisLables.yAxis;
+    /*
+     yObjsects format:
+     {y1:{column:'',name:'name',color:'color'},y2}
+     */
 
-var svg_line = d3.select("#viz1").select("#linechart")
-.append("g")
-.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    chartObj.data = dataset;
+    chartObj.margin = {top: 15, right: 60, bottom: 30, left: 50};
+    chartObj.width = 650 - chartObj.margin.left - chartObj.margin.right;
+    chartObj.height = 480 - chartObj.margin.top - chartObj.margin.bottom;
 
-var parseTime = d3.timeParse("%Y");
+// So we can pass the x and y as strings when creating the function
+    chartObj.xFunct = function(d){return d[xName]};
 
-var x = d3.scaleTime().range([0, width]),
-    y = d3.scaleLinear().range([height, 0]);
+// For each yObjs argument, create a yFunction
+    function getYFn(column) {
+        return function (d) {
+            return d[column];
+        };
+    }
 
-var colorMap = {"hotel": d3.rgb("#7fc97f"), "residential":d3.rgb("#fdc086"), "office":d3.rgb("#beaed4"), "other":d3.rgb("#f0027f"), "all":d3.rgb("#386cb0")};
+// Object instead of array
+    chartObj.yFuncts = [];
+    for (var y  in yObjs) {
+        yObjs[y].name = y;
+        yObjs[y].yFunct = getYFn(yObjs[y].column); //Need this  list for the ymax function
+        chartObj.yFuncts.push(yObjs[y].yFunct);
+    }
 
-var xAxis_line = d3.axisBottom()
-    .scale(x);
-
-var yAxis_line = d3.axisLeft()
-    .scale(y);
-
-var line = d3.line()
-    .curve(d3.curveBasis)
-    .x(function(d) { return x(d.year); })
-    .y(function(d) { return y(d.count); });
-
-
-// will keep track of which purpose is being shown and full name of purpose
-var purpMap = {};
-
-d3.csv("skyscrapers-count.csv", type, function(error, data) {
-  //if (error) throw error;
-
-  var purposes = data.columns.slice(1).map(function(id) {
-    return {
-      id: id,
-      values: data.map(function(d) {
-        return {year: d.year, count: d[id]};
-      })
+//Formatter functions for the axes
+    chartObj.formatAsNumber = d3.format(".0f");
+    chartObj.formatAsDecimal = d3.format(".2f");
+    chartObj.formatAsCurrency = d3.format("$.2f");
+    chartObj.formatAsFloat = function (d) {
+        if (d % 1 !== 0) {
+            return d3.format(".2f")(d);
+        } else {
+            return d3.format(".0f")(d);
+        }
+        
     };
-  });
 
-  x.domain([d3.min(data, function(d){return d.year; }), d3.max(data, function(d){return d.year;})]);
+    chartObj.xFormatter = chartObj.formatAsNumber;
+    chartObj.yFormatter = chartObj.formatAsFloat;
 
-  y.domain([
-    d3.min(purposes, function(c) { return d3.min(c.values, function(d) { return d.count; }); }),
-    d3.max(purposes, function(c) { return d3.max(c.values, function(d) { return d.count; }); })
-  ]);
+    chartObj.bisectYear = d3.bisector(chartObj.xFunct).left; //< Can be overridden in definition
 
-  var allPurp = (purposes.map(function(c) { return c.id; }));
-  for (index in allPurp){
-    purpMap[allPurp[index].substring(0, 3).toUpperCase()] = {"shown": true, "full": allPurp[index]};
-  }
+//Create scale functions
+    chartObj.xScale = d3.scale.linear().range([0, chartObj.width]).domain(d3.extent(chartObj.data, chartObj.xFunct)); //< Can be overridden in definition
 
-  svg_line.append("g")
-      .attr("class", "xaxis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis_line);
+// Get the max of every yFunct
+    chartObj.max = function (fn) {
+        return d3.max(chartObj.data, fn);
+    };
+    chartObj.yScale = d3.scale.linear().range([chartObj.height, 0]).domain([0, d3.max(chartObj.yFuncts.map(chartObj.max))]);
 
-  svg_line.append("text")
-      .attr("x", width/2)
-      .attr("y", height+40)
-      .attr("font-family", "Chivo")
-      .attr("font-size", "12px")
-      .attr("font-weight", "400")
-      .text("Year");
+    chartObj.formatAsYear = d3.format("");
 
-  svg_line.append("g")
-      .attr("class", "yaxis")
-      .call(yAxis_line)
-      .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", "0.71em")
-      .attr("fill", "#000")
-      .style("font-family", "Chivo")
-      .attr("font-size", "12px")
-      .attr("font-weight", "400")
-      .text("Number of Skyscrapers");
+//Create axis
+    chartObj.xAxis = d3.svg.axis().scale(chartObj.xScale).orient("bottom").tickFormat(chartObj.xFormatter); //< Can be overridden in definition
 
-  svg_line.append("text")
-        .attr("transform", "translate(" + width/2 + "," + -20 + ")")
-        .style("text-anchor", "middle")
-        .attr("font-family", "Chivo")
-        .attr("font-weight", "300")
-        .attr("font-size", "20px")
-        .text("Number of Skyscrapers by Year in the US");
+    chartObj.yAxis = d3.svg.axis().scale(chartObj.yScale).orient("left").tickFormat(chartObj.yFormatter); //< Can be overridden in definition
 
-  var purp = svg_line.selectAll(".purp")
-    .data(purposes)
-    .enter().append("g")
-    .attr("class", "purp");
 
-  purp.append("path")
-      .attr("class", "line")
-      .attr("id", function(d){
-          return d.id.substring(0, 3).toUpperCase();
-      })
-      .attr("d", function(d) { return line(d.values); })
-      .style("stroke", function(d) { return colorMap[d.id]; });
+// Build line building functions
+    function getYScaleFn(yObj) {
+        return function (d) {
+            return chartObj.yScale(yObjs[yObj].yFunct(d));
+        };
+    }
+    for (var yObj in yObjs) {
+        yObjs[yObj].line = d3.svg.line().interpolate("cardinal").x(function (d) {
+            return chartObj.xScale(chartObj.xFunct(d));
+        }).y(getYScaleFn(yObj));
+    }
+    
 
-  purp.append("text")
-      .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
-      .attr("transform", function(d) { return "translate(" + x(d.value.year) + "," + y(d.value.count) + ")"; })
-      .attr("x", 3)
-      .attr("dy", "0.35em")
-      .attr("font-weight", "400")
-      .attr("font-family", "Chivo")
-      .attr("font-size", "12px")
-      .text(function(d) { return d.id.substring(0,1).toUpperCase() + d.id.substring(1,d.id.length); })
-      .on("mouseover", function(d){
-        var thisId = d.id.substring(0, 3).toUpperCase();
-        if (purpMap[thisId].shown){
-          for (purpose in purpMap){
-            if (purpose != thisId){
-              if (purpMap[purpose].shown){
-                d3.select("path#" + purpose).style("stroke", "lightgray").style("opacity", 0.3);
-              }
+    chartObj.svg;
+
+// Change chart size according to window size
+    chartObj.update_svg_size = function () {
+        chartObj.width = parseInt(chartObj.chartDiv.style("width"), 10) - (chartObj.margin.left + chartObj.margin.right);
+
+        chartObj.height = parseInt(chartObj.chartDiv.style("height"), 10) - (chartObj.margin.top + chartObj.margin.bottom);
+
+        /* Update the range of the scale with new width/height */
+        chartObj.xScale.range([0, chartObj.width]);
+        chartObj.yScale.range([chartObj.height, 0]);
+
+        if (!chartObj.svg) {return false;}
+
+        /* Else Update the axis with the new scale */
+        chartObj.svg.select('.x.axis').attr("transform", "translate(0," + chartObj.height + ")").call(chartObj.xAxis);
+        chartObj.svg.select('.x.axis .label').attr("x", chartObj.width / 2);
+
+        chartObj.svg.select('.y.axis').call(chartObj.yAxis);
+        chartObj.svg.select('.y.axis .label').attr("x", -chartObj.height / 2);
+
+        /* Force D3 to recalculate and update the line */
+        for (var y  in yObjs) {
+            yObjs[y].path.attr("d", yObjs[y].line);
+        }
+        
+
+        d3.selectAll(".focus.line").attr("y2", chartObj.height);
+
+        chartObj.chartDiv.select('svg').attr("width", chartObj.width + (chartObj.margin.left + chartObj.margin.right)).attr("height", chartObj.height + (chartObj.margin.top + chartObj.margin.bottom));
+
+        chartObj.svg.select(".overlay").attr("width", chartObj.width).attr("height", chartObj.height);
+        return chartObj;
+    };
+
+    chartObj.bind = function (selector) {
+        chartObj.mainDiv = d3.select(selector);
+        // Add all the divs to make it centered and responsive
+        chartObj.mainDiv.append("div").attr("class", "inner-wrapper").append("div").attr("class", "outer-box").append("div").attr("class", "inner-box");
+        chartSelector = selector + " .inner-box";
+        chartObj.chartDiv = d3.select(chartSelector);
+        d3.select(window).on('resize.' + chartSelector, chartObj.update_svg_size);
+        chartObj.update_svg_size();
+        return chartObj;
+    };
+
+// Render the chart
+    chartObj.render = function () {
+        //Create SVG element
+        chartObj.svg = chartObj.chartDiv.append("svg").attr("class", "chart-area").attr("width", chartObj.width + (chartObj.margin.left + chartObj.margin.right)).attr("height", chartObj.height + (chartObj.margin.top + chartObj.margin.bottom)).append("g").attr("transform", "translate(" + chartObj.margin.left + "," + chartObj.margin.top + ")");
+
+        // Draw Lines
+        for (var y  in yObjs) {
+            yObjs[y].path = chartObj.svg.append("path").datum(chartObj.data).attr("class", "line").attr("d", yObjs[y].line).style("stroke", color(y)).attr("data-series", y).on("mouseover", function () {
+                focus.style("display", null);
+            }).on("mouseout", function () {
+                focus.transition().delay(700).style("display", "none");
+            }).on("mousemove", mousemove);
+        }
+        
+
+        // Draw Axis
+        chartObj.svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + chartObj.height + ")").call(chartObj.xAxis).append("text").attr("class", "label").attr("x", chartObj.width / 2).attr("y", 30).style("text-anchor", "middle").text(chartObj.xAxisLable);
+
+        chartObj.svg.append("g").attr("class", "y axis").call(chartObj.yAxis).append("text").attr("class", "label").attr("transform", "rotate(-90)").attr("y", -42).attr("x", -chartObj.height / 2).attr("dy", ".71em").style("text-anchor", "middle").text(chartObj.yAxisLable);
+
+        //Draw tooltips
+        var focus = chartObj.svg.append("g").attr("class", "focus").style("display", "none");
+
+        for (var y  in yObjs) {
+            yObjs[y].tooltip = focus.append("g");
+            yObjs[y].tooltip.append("circle").attr("r", 5);
+            yObjs[y].tooltip.append("rect").attr("x", 8).attr("y","-5").attr("width",22).attr("height",'0.75em');
+            yObjs[y].tooltip.append("text").attr("x", 9).attr("dy", ".35em");
+        }
+
+        // Year label
+        focus.append("text").attr("class", "focus year").attr("x", 9).attr("y", 7);
+        // Focus line
+        focus.append("line").attr("class", "focus line").attr("y1", 0).attr("y2", chartObj.height);
+
+        //Draw legend
+        var legend = chartObj.mainDiv.append('div').attr("class", "legend");
+        for (var y  in yObjs) {
+            series = legend.append('div');
+            series.append('div').attr("class", "series-marker").style("background-color", color(y));
+            series.append('p').text(y);
+            yObjs[y].legend = series;
+        }
+
+        // Overlay to capture hover
+        chartObj.svg.append("rect").attr("class", "overlay").attr("width", chartObj.width).attr("height", chartObj.height).on("mouseover", function () {
+            focus.style("display", null);
+        }).on("mouseout", function () {
+            focus.style("display", "none");
+        }).on("mousemove", mousemove);
+
+        return chartObj;
+        function mousemove() {
+            var x0 = chartObj.xScale.invert(d3.mouse(this)[0]), i = chartObj.bisectYear(dataset, x0, 1), d0 = chartObj.data[i - 1], d1 = chartObj.data[i];
+            try {
+                var d = x0 - chartObj.xFunct(d0) > chartObj.xFunct(d1) - x0 ? d1 : d0;
+            } catch (e) { return;}
+            minY = chartObj.height;
+            for (var y  in yObjs) {
+                yObjs[y].tooltip.attr("transform", "translate(" + chartObj.xScale(chartObj.xFunct(d)) + "," + chartObj.yScale(yObjs[y].yFunct(d)) + ")");
+                yObjs[y].tooltip.select("text").text(chartObj.yFormatter(yObjs[y].yFunct(d)));
+                minY = Math.min(minY, chartObj.yScale(yObjs[y].yFunct(d)));
             }
-          } 
+
+            focus.select(".focus.line").attr("transform", "translate(" + chartObj.xScale(chartObj.xFunct(d)) + ")").attr("y1", minY);
+            focus.select(".focus.year").text("Year: " + chartObj.xFormatter(chartObj.xFunct(d)));
         }
-      })
-      .on("mouseout", function(d){
-        for (purpose in purpMap){
-          if (purpMap[purpose] && purpMap[purpose].shown){
-            d3.select("path#" + purpose).style("stroke", colorMap[purpMap[purpose].full]).style("opacity", 1);
-          }
-        } 
-      })
-      .on("click", function(d){
-        var id = d.id.substring(0, 3).toUpperCase();
-        var newOpacity = 0;
-        newOpacity = purpMap[id].shown ? 0: 1;
-        purpMap[id].shown = !(purpMap[id].shown);
-        d3.select("path#" + id).style("opacity", newOpacity);
-      });
 
-    // place year 
-
-    var focusYear = svg_line.append("g")
-      .attr("class", "focus")
-      .style("display", "none");
-
-    focusYear.append("text")
-        .attr("class", "date")
-        .style("stroke", "white")
-        .style("stroke-width", "3.5px")
-        .style("opacity", 0.8)
-        .attr("dx", 8)
-        .attr("dy", "-.3em")
-        .attr("font-family", "Chivo")
-        .attr("font-weight", "400")
-        .attr("font-size", "12px");
-    focusYear.append("text")
-        .attr("class", "date")
-        .attr("dx", 8)
-        .attr("dy", "-.3em")
-        .attr("font-family", "Chivo")
-        .attr("font-weight", "400")
-        .attr("font-size", "12px");
-
-
-    var focus = svg_line.append("g")
-      .attr("class", "focus")
-      .style("display", "none");
-
-
-  //Adds circle to focus point on line
-  focus.append("circle")
-      .attr("r", 6)
-      .attr("stroke-opacity", 0.5);
-
-    // place the value
-    focus.append("text")
-        .attr("class", "y3")
-        .style("stroke", "white")
-        .style("stroke-width", "3.5px")
-        .style("opacity", 0.8)
-        .attr("dx", 8)
-        .attr("dy", "1em");
-    focus.append("text")
-        .attr("class", "y4")
-        .attr("dx", 8)
-        .attr("dy", "1em");
-
-  ////2
-
-  var focus2 = svg_line.append("g")
-      .attr("class", "focus")
-      .style("display", "none");
-
-  focus2.append("circle")
-      .attr("r", 6)
-      .attr("stroke-opacity", 0.5);
-
-    focus2.append("text")
-        .attr("class", "y3")
-        .style("stroke", "white")
-        .style("stroke-width", "3.5px")
-        .style("opacity", 0.8)
-        .attr("dx", 8)
-        .attr("dy", "1em");
-    focus2.append("text")
-        .attr("class", "y4")
-        .attr("dx", 8)
-        .attr("dy", "1em");
-
-    ///3
-
-  var focus3 = svg_line.append("g")
-      .attr("class", "focus")
-      .style("display", "none");
-
-  focus3.append("circle")
-      .attr("r", 6)
-      .attr("stroke-opacity", 0.5);
-
-    focus3.append("text")
-        .attr("class", "y3")
-        .style("stroke", "white")
-        .style("stroke-width", "3.5px")
-        .style("opacity", 0.8)
-        .attr("dx", 8)
-        .attr("dy", "1em");
-    focus3.append("text")
-        .attr("class", "y4")
-        .attr("dx", 8)
-        .attr("dy", "1em");
-
-    ///4
-
-  var focus4 = svg_line.append("g")
-      .attr("class", "focus")
-      .style("display", "none");
-
-  focus4.append("circle")
-      .attr("r", 6)
-      .attr("stroke-opacity", 0.5);
-
-    focus4.append("text")
-        .attr("class", "y3")
-        .style("stroke", "white")
-        .style("stroke-width", "3.5px")
-        .style("opacity", 0.8)
-        .attr("dx", 8)
-        .attr("dy", "1em");
-    focus4.append("text")
-        .attr("class", "y4")
-        .attr("dx", 8)
-        .attr("dy", "1em");
-
-    ///5
-
-  var focus5 = svg_line.append("g")
-      .attr("class", "focus")
-      .style("display", "none");
-
-  focus5.append("circle")
-      .attr("r", 6)
-      .attr("stroke-opacity", 0.5);
-
-    focus5.append("text")
-        .attr("class", "y3")
-        .style("stroke", "white")
-        .style("stroke-width", "3.5px")
-        .style("opacity", 0.8)
-        .attr("dx", 8)
-        .attr("dy", "1em");
-
-    focus5.append("text")
-        .attr("class", "y4")
-        .attr("dx", 8)
-        .attr("dy", "1em");
-
-
-    ///
-    var focusLine = svg_line.append("g")
-      .attr("class", "focus")
-      .style("display", "none");
-
-    focusLine.append("line")
-      .attr("id", "vertLine")
-      .attr("x1", 0)
-      .attr("x2", 0)
-      .attr("y1", 0)
-      .attr("y2", height)
-      .style("stroke", "black")
-      .style("stroke-width", "1px")
-      .style("stroke-opacity", 0.25);
-  
-  //Creates larger area for tooltip   
-  var overlay = svg_line.append("rect")
-      .attr("class", "overlayLine")
-      .attr("width", width)
-      .attr("height", height)
-      .on("mouseover", function() {
-
-        if (purpMap['ALL'].shown){
-          focus.style("display", null);
-        }
-        if (purpMap['HOT'].shown){
-          focus2.style("display", null);
-        }
-        if (purpMap['OFF'].shown){
-          focus3.style("display", null);
-        }
-        if (purpMap['RES'].shown){
-          focus4.style("display", null);
-        }
-        if (purpMap['OTH'].shown){
-          focus5.style("display", null);
-        }
-        focusYear.style("display", null);
-        focusLine.style("display", null); })
-      .on("mouseout", function() {
-        focus.style("display", "none");
-        focus2.style("display", "none");
-        focus3.style("display", "none");
-        focus4.style("display", "none"); 
-        focus5.style("display", "none"); 
-        focusYear.style("display", "none");
-        focusLine.style("display", "none");  })
-      .on("mousemove", mousemove);
-  
-  //Tooltip mouseovers            
-  function mousemove() {
-    var x0 = x.invert(d3.mouse(this)[0]),
-        i = bisectDate(data, x0, 1),
-        d0 = data[i - 1],
-        d1 = data[i],
-        d = x0 - d0.year > d1.year - x0 ? d1 : d0;
-    focus.attr("transform", "translate(" + x(d.year) + "," + y(d.all) + ")");
-    focus2.attr("transform", "translate(" + x(d.year) + "," + y(d.hotel) + ")");
-    focus3.attr("transform", "translate(" + x(d.year) + "," + y(d.office) + ")");
-    focus4.attr("transform", "translate(" + x(d.year) + "," + y(d.residential) + ")");
-    focus5.attr("transform", "translate(" + x(d.year) + "," + y(d.other) + ")");
-    focusYear.attr("transform", "translate(" + (x(d.year)-75) + ", 30)");
-
-    d3.select("#vertLine")
-      .attr("transform", "translate(" + x(d.year) + ", 0)");
-
-    focusYear.selectAll(".date")
-       .text("Year: " + d.year.getFullYear());
-
-    focus.select("text.y3")
-        .text(d.all);
-
-    focus.select("text.y4")
-        .text(d.all);
-
-    focus2.select("text.y3")
-        .text(d.hotel);
-
-    focus2.select("text.y4")
-        .text(d.hotel);
-
-    focus3.select("text.y3")
-        .text(d.office);
-
-    focus3.select("text.y4")
-        .text(d.office);
-
-    focus4.select("text.y3")
-        .text(d.residential);
-
-    focus4.select("text.y4")
-        .text(d.residential);
-
-    focus5.select("text.y3")
-        .text(d.other);
-
-    focus5.select("text.y4")
-        .text(d.other);
-
-  }; 
-
-  var bisectDate = d3.bisector(function(d) { return (d.year); }).left;    
-
-});
-
-function type(d, _, columns) {
-  d.year = parseTime(d.year);
-  for (var i = 1, n = columns.length, c; i < n; ++i) d[c = columns[i]] = +d[c];
-  return d;
+    };
+    return chartObj;
 }
