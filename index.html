@@ -29,7 +29,7 @@
 
 <script type="text/javascript">
     d3.csv('skyscrapers-count.csv', function(error, data) {
-    data.quotesArray.forEach(function (d) {
+    data.forEach(function (d) {
         d.year = +d.year;
         d.all = +d.all;
         d.hotel = +d.hotel;
