@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>A Visualization of Skyscrapers in the US</title>
+	<link rel="stylesheet" href="styles.css">    
+	<script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+	<script src="line.js"></script>
+</head>
+	
+<body>
+
+  <header id="header" class="skel-layers-fixed">	 
+   <h1>
+	<div id="title_narrative">A Visualization of Skyscrapers in the US</div>
+   </h1>
+  </header>
+	
+<div class="container">
+   <section>
+  <p>The first scene shows the number of skyscrapers existing in the US over the years in a cumulative manner.</p>
+  <p>Hover over a category name for brushing (other lines will be grayed out).</p>
+  <p>Click on a category name to remove it, and click again to bring it back.</p>
+  <p>The data is from the year 1910-2016.</p>
+  </section>
+</div>
+ 
+ <div class="container">
+ <div id="viz1"><svg id="linechart" height="500" width="1000"></svg>
+</div> 
+	 
+<div id="scene1_source">Source = <a href="https://corgis-edu.github.io/corgis/csv/skyscrapers/" target="_blank">CORGIS Skyscrapers dataset</a></div>
+
+<div id="scene1_next_page">
+    <button onclick="window.location.href='https://parulmainwal.github.io/CS498_DataViz_Project/next_page2.html';">
+      Next
+    </button>
+   </div>
+
+</body>
+
