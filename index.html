@@ -3,18 +3,18 @@
 <head>
 	<meta charset="utf-8">
 	<title>A Visualization of Skyscrapers in the US</title>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<link rel="stylesheet" href="styles.css">    
 	<script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
-	
+	<script src="line.js"></script>
 </head>
+	
 <body>
 
-<header id="header" class="skel-layers-fixed">	 
+  <header id="header" class="skel-layers-fixed">	 
    <h1>
 	<div id="title_narrative">A Visualization of Skyscrapers in the US</div>
    </h1>
-</header>
+  </header>
 	
 <div class="container">
    <section>
@@ -26,14 +26,13 @@
 </div>
  
  <div class="container">
-<div id="viz1"><svg id="linechart" height="500" width="1000"></svg>
-<script src="line.js"></script>
+ <div id="viz1"><svg id="linechart" height="500" width="1000"></svg>
 </div> 
 	 
- <div id="scene1_source">Source = <a href="https://corgis-edu.github.io/corgis/csv/skyscrapers/" target="_blank">CORGIS Skyscrapers dataset</a></div>
+<div id="scene1_source">Source = <a href="https://corgis-edu.github.io/corgis/csv/skyscrapers/" target="_blank">CORGIS Skyscrapers dataset</a></div>
 
-   <div id="scene1_next_page">
-	<button onclick="window.location.href='https://parulmainwal.github.io/CS498_DataViz_Project/scene_2_web_page.html';">
+<div id="scene1_next_page">
+    <button onclick="window.location.href='https://parulmainwal.github.io/CS498_DataViz_Project/next_page1.html';">
       Next
     </button>
    </div>
