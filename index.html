@@ -10,66 +10,33 @@
 </head>
 <body>
 
-<table >
-<tr><td></td></tr>
-<tr><td></td></tr>
-<tr><td></td></tr>
-<tr><td></td></tr>
-<tr><td></td></tr>
-<tr><td></td></tr>
-<tr><td></td></tr>
-<tr><td></td></tr>
-
- <tr>
-  <td>
-    <h1>
+<header id="header" class="skel-layers-fixed">	 
+   <h1>
 	<div id="title_narrative">A Visualization of Skyscrapers in the US</div>
    </h1>
-   </td>
- </tr>
-  <tr>
-  <td> </td>
-  </td>
- </tr>
- <tr>
-   <td>
-    <h3>
-        <div></div>
-    </h3>
-   </td>
- </tr>
- <tr>
-  <td>
-   <div id="scene1_info_top">
+</header>
+	
+<div class="container">
+   <section>
   <p>The first scene shows the number of skyscrapers existing in the US over the years in a cumulative manner.</p>
   <p>Hover over a category name for brushing (other lines will be grayed out).</p>
   <p>Click on a category name to remove it, and click again to bring it back.</p>
   <p>The data is from the year 1910-2016.</p>
-  </div>
-  </td>
- </tr>
+  </section>
+</div>
  
-  <tr>
-    <td><div id="viz1"></div></td>
- </tr>
-
-<tr>
-  <td>
- <br>  
+ <div class="container">
+<div id="viz1"><svg id="linechart" height="500" width="1000"></svg>
+<script src="code/line.js"></script>
+</div> 
+	 
  <div id="scene1_source">Source = <a href="https://corgis-edu.github.io/corgis/csv/skyscrapers/" target="_blank">CORGIS Skyscrapers dataset</a></div>
- </br>  
-</td>
- </tr>
- <tr>
-  <td>
+
    <div id="scene1_next_page">
 	<button onclick="window.location.href='https://parulmainwal.github.io/CS498_DataViz_Project/scene_2_web_page.html';">
       Next
     </button>
    </div>
-   </td>
- </tr>
-</table>
 
 /body>
 </html>
