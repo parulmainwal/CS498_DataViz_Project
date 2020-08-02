@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>A Visualization of Skyscrapers in the US</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<link rel="stylesheet" href="styles.css">    
+	<script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+	
+	<script type="text/javascript" src="line.js"></script>
+</head>
+<body>
+
+<table >
+<tr><td></td></tr>
+<tr><td></td></tr>
+<tr><td></td></tr>
+<tr><td></td></tr>
+<tr><td></td></tr>
+<tr><td></td></tr>
+<tr><td></td></tr>
+<tr><td></td></tr>
+
+ <tr>
+  <td>
+    <h1>
+	<div id="title_narrative">A Visualization of Skyscrapers in the US</div>
+   </h1>
+   </td>
+ </tr>
+  <tr>
+  <td> </td>
+  </td>
+ </tr>
+ <tr>
+   <td>
+    <h3>
+        <div></div>
+    </h3>
+   </td>
+ </tr>
+ <tr>
+  <td>
+   <div id="scene1_info_top">
+  <p>The first scene shows the number of skyscrapers existing in the US over the years in a cumulative manner.</p>
+  <p>Hover over a category name for brushing (other lines will be grayed out).</p>
+  <p>Click on a category name to remove it, and click again to bring it back.</p>
+  <p>The data is from the year 1910-2016.</p>
+  </div>
+  </td>
+ </tr>
+ 
+  <tr>
+    <td><div id="viz1"></div></td>
+ </tr>
+
+<tr>
+  <td>
+ <br>  
+ <div id="scene1_source">Source = <a href="https://corgis-edu.github.io/corgis/csv/skyscrapers/" target="_blank">CORGIS Skyscrapers dataset</a></div>
+ </br>  
+</td>
+ </tr>
+ <tr>
+  <td>
+   <div id="scene1_next_page">
+	<button onclick="window.location.href='https://joker2025.github.io/NY_Covid_2020/scene_2_web_page.html';">
+      Next
+    </button>
+   </div>
+   </td>
+ </tr>
+</table>
+
+
+<script>
+// set the dimensions and margins of the graph
+var margin = {top: 10, right: 30, bottom: 30, left: 60};
+var width = 1000 - margin.left - margin.right;
+var height = 400 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#viz1")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+//Read the data
+const data = d3.csv("C:\Desktop\MCS-DS\DV\Project\skyscrapers-count.csv",
+
+//format data
+function(d){
+    return { date : d3.timeParse("%d-%b-%Y")(d.date), CASE_COUNT : +d.CASE_COUNT , HOSPITALIZED_COUNT : +d.HOSPITALIZED_COUNT , DEATH_COUNT: +d.DEATH_COUNT }
+},
+
+function(data) {
+
+//setup X Scale
+var xScale = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+
+//setup X Axis
+var xAxis = d3.axisBottom(xScale)
+    .ticks(20)
+    .tickFormat(d3.timeFormat('%b %d'))
+    .scale(xScale);
+
+//draw X axis
+svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+
+//setup Y Scale
+var yScale = d3.scaleLinear()
+    .domain([0, d3.max(data, function(d) { return Math.max(d.CASE_COUNT, d.HOSPITALIZED_COUNT,d.DEATH_COUNT); })])
+    .range([ height, 0 ]);
+
+//setup Y axis
+var yAxis = d3.axisLeft(yScale);
+
+//draw Y axis
+svg.append("g")
+     .call(yAxis);
+
+//*******************************
+//draw the lines
+//*******************************
+
+//line for CASE_COUNT
+svg.append("path")
+    .datum(data)
+    .attr("fill", "none")
+    .attr("stroke", "#663300")
+    .attr("stroke-width", 1.5)
+    .attr("d", d3.line()
+      .x(function(d) { return xScale(d.date) })
+      .y(function(d) { return yScale(d.CASE_COUNT) })      
+)
+
+//line for HOSPITALIZED_COUNT
+svg.append("path")
+    .datum(data)
+    .attr("fill", "none")
+    .attr("stroke", "#808080")
+    .attr("stroke-width", 1.5)
+    .attr("d", d3.line()
+      .x(function(d) { return xScale(d.date) })
+      .y(function(d) { return yScale(d.HOSPITALIZED_COUNT) })
+)
+
+//line for DEATH_COUNT
+svg.append("path")
+    .datum(data)
+    .attr("fill", "none")
+    .attr("stroke", "#ff5050")
+    .attr("stroke-width", 1.5)
+    .attr("d", d3.line()
+      .x(function(d) { return xScale(d.date) })
+      .y(function(d) { return yScale(d.DEATH_COUNT) })
+)
+
+
+
+
+
+})
+</script>
+</body>
+</html>
