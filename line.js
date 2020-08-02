@@ -2,7 +2,7 @@
     width = 1000 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
-var svg_line = d3.select("#viz1")
+var svg_line = d3.select("#viz1").select("#linechart")
 .append("g")
 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -24,8 +24,6 @@ var line = d3.line()
     .x(function(d) { return x(d.year); })
     .y(function(d) { return y(d.count); });
 
-
-// will keep track of which purpose is being shown and full name of purpose
 var purpMap = {};
 
 d3.csv("skyscrapers-count.csv", type, function(error, data) {
@@ -134,8 +132,6 @@ d3.csv("skyscrapers-count.csv", type, function(error, data) {
         purpMap[id].shown = !(purpMap[id].shown);
         d3.select("path#" + id).style("opacity", newOpacity);
       });
-
-    // place year 
 
     var focusYear = svg_line.append("g")
       .attr("class", "focus")
