@@ -307,7 +307,7 @@ var divisionList = [
             });
         
         legendItem.append("text")
-            .attr("x", width + 20)
+            .attr("x", 20)
             .attr("y", 9)
             .attr("dy", ".35em")
             .style("text-anchor", "start")
