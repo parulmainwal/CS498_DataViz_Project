@@ -91,7 +91,7 @@ var divisionList = [
 
     // renderLegend();
 
-    d3.csv("data/skyscrapers-main.csv", function (error, data) {    
+    d3.csv("skyscrapers-main.csv", function (error, data) {    
         if (error) throw error;
 
         data.forEach(function (d) {
