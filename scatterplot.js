@@ -183,8 +183,7 @@ var divisionList = [
     function showTooltip(d) {    
         // Increase the size and change the color of the dot
         d3.select(this).raise()
-            .attr("r", dotRadiusHover)
-            .style("fill", dotHoverColor);
+            .attr("r", dotRadiusHover);
 
         var purposeScatter = 'purposes: ' + '<i>' + d.purposes + '</i>';
 
