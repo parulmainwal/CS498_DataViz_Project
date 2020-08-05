@@ -82,6 +82,7 @@ d3.csv("skyscrapers-citywise.csv", function(data){
       .attr("y", function(d) { return yScaleBar(+d.height); })
       .attr("height", function(d) { return height_bar - yScaleBar(+d.height); })
       .attr("width", xScaleBar.bandwidth())
+      .style("color", "lightblue")
       .on("mouseover", function(d) {
         
 					//Get this bar's x/y values, then augment for the tooltip
@@ -116,7 +117,7 @@ d3.csv("skyscrapers-citywise.csv", function(data){
           .attr("y", yPosition-55)
           .style("font", "10px 'Chivo'")
           .style("font-weight", "300")
-          .style("color", "lightblue")
+          .style("color", "black")
           .html(d.city + ", " + d.state + "<br><b> height: </b>" + d3.format(".5n")(d.height) + " m <br>" + "<b>completed:</b> " + d["completed.year"] +
             "<br><b>purposes: </b>" + purposeString);
 
@@ -141,7 +142,7 @@ d3.csv("skyscrapers-citywise.csv", function(data){
           .attr("y", yPosition-40)
           .style("font", "10px 'Chivo'")
           .style("font-weight", "300")
-          .style("color", "lightblue")
+          .style("color", "black")
           .html("<b> height: </b>" + d3.format(".5n")(d.height) + " m <br>" + "<b>completed:</b> " + d["completed.year"] +
             "<br><b>purposes: </b>" + purposeString);
 
