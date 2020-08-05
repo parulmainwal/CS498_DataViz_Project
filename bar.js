@@ -6,6 +6,8 @@ var svg_bar = d3.select("#viz4").select("#bar")
 	.append("g")
   .attr("transform", "translate(" + margin_bar.left + "," + margin_bar.top + ")");
 
+var colors = color = d3.scaleOrdinal(d3.schemeCategory10);
+
 var yScaleBar = d3.scaleLinear()
       .range([height_bar, 0]);
 
@@ -80,6 +82,7 @@ d3.csv("skyscrapers-citywise.csv", function(data){
       .attr("y", function(d) { return yScaleBar(+d.height); })
       .attr("height", function(d) { return height_bar - yScaleBar(+d.height); })
       .attr("width", xScaleBar.bandwidth())
+      .style('fill', (d, i) => (colors(i) )) 	
       .on("mouseover", function(d) {
         
 					//Get this bar's x/y values, then augment for the tooltip
