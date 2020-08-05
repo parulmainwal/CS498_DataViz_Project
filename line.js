@@ -10,8 +10,8 @@ function makeLineChart(dataset, xName, yObjs, axisLables) {
 
     chartObj.data = dataset;
     chartObj.margin = {top: 15, right: 60, bottom: 30, left: 50};
-    chartObj.width = 450 - chartObj.margin.left - chartObj.margin.right;
-    chartObj.height = 280 - chartObj.margin.top - chartObj.margin.bottom;
+    chartObj.width = 250 - chartObj.margin.left - chartObj.margin.right;
+    chartObj.height = 80 - chartObj.margin.top - chartObj.margin.bottom;
 
 // So we can pass the x and y as strings when creating the function
     chartObj.xFunct = function(d){return d[xName]};
