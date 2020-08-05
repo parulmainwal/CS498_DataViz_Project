@@ -2,6 +2,8 @@ var margin_bar = {top: 100, right: 100, bottom: 70, left: 50},
     width_bar = 1000 - margin_bar.left - margin_bar.right,
     height_bar = 520 - margin_bar.top - margin_bar.bottom;
 
+//var color = d3.scale.category10();
+
 var svg_bar = d3.select("#viz4").select("#bar")
 	.append("g")
   .attr("transform", "translate(" + margin_bar.left + "," + margin_bar.top + ")");
@@ -114,7 +116,7 @@ d3.csv("skyscrapers-citywise.csv", function(data){
           .attr("y", yPosition-55)
           .style("font", "10px 'Chivo'")
           .style("font-weight", "300")
-          .style("color", "black")
+          .style("color", "lightblue")
           .html(d.city + ", " + d.state + "<br><b> height: </b>" + d3.format(".5n")(d.height) + " m <br>" + "<b>completed:</b> " + d["completed.year"] +
             "<br><b>purposes: </b>" + purposeString);
 
@@ -139,7 +141,7 @@ d3.csv("skyscrapers-citywise.csv", function(data){
           .attr("y", yPosition-40)
           .style("font", "10px 'Chivo'")
           .style("font-weight", "300")
-          .style("color", "black")
+          .style("color", "lightblue")
           .html("<b> height: </b>" + d3.format(".5n")(d.height) + " m <br>" + "<b>completed:</b> " + d["completed.year"] +
             "<br><b>purposes: </b>" + purposeString);
 
