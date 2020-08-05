@@ -8,7 +8,7 @@ var svg_bar = d3.select("#viz4").select("#bar")
 	.append("g")
   .attr("transform", "translate(" + margin_bar.left + "," + margin_bar.top + ")");
 
-var yScaleBar = d3.scaleLinear()
+var yScaleBar = d3.scale.linear()
       .range([height_bar, 0]);
 
 var xScaleBar = d3.scaleBand()
