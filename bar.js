@@ -2,13 +2,13 @@ var margin_bar = {top: 100, right: 100, bottom: 70, left: 50},
     width_bar = 1000 - margin_bar.left - margin_bar.right,
     height_bar = 520 - margin_bar.top - margin_bar.bottom;
 
-var colors = d3.scale.category10();
+//var colors = d3.scale.category10();
 
 var svg_bar = d3.select("#viz4").select("#bar")
 	.append("g")
   .attr("transform", "translate(" + margin_bar.left + "," + margin_bar.top + ")");
 
-var yScaleBar = d3.scale.linear()
+var yScaleBar = d3.scaleLinear()
       .range([height_bar, 0]);
 
 var xScaleBar = d3.scaleBand()
@@ -82,7 +82,7 @@ d3.csv("skyscrapers-citywise.csv", function(data){
       .attr("y", function(d) { return yScaleBar(+d.height); })
       .attr("height", function(d) { return height_bar - yScaleBar(+d.height); })
       .attr("width", xScaleBar.bandwidth())
-      .attr("fill",function(d,i){return colors(i)})
+      //.attr("fill",function(d,i){return colors(i)})
       .on("mouseover", function(d) {
         
 					//Get this bar's x/y values, then augment for the tooltip
