@@ -82,7 +82,6 @@ d3.csv("skyscrapers-citywise.csv", function(data){
       .attr("y", function(d) { return yScaleBar(+d.height); })
       .attr("height", function(d) { return height_bar - yScaleBar(+d.height); })
       .attr("width", xScaleBar.bandwidth())
-      .style("color", "lightblue")
       .on("mouseover", function(d) {
         
 					//Get this bar's x/y values, then augment for the tooltip
