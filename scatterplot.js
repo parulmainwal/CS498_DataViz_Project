@@ -20,7 +20,7 @@ var divisionList = [
     var allDivisions = divisionList.map(function (d) { return d.name; });
     var allRegions = regionList.map(function (d) { return d.name; });
 
-    var colors = color = d3.scaleOrdinal(d3.schemeCategory10);
+    var colors = d3.scaleOrdinal(d3.schemeCategory10);
 
     var allPurposes = ["air traffic control tower", "belltower", "bridge", "casino", "commercial", "education", "exhibition", "government", "hospital", "hotel", "industrial", "library", "museum", "observation", "office", "other", "religious", "residential", "retail", "serviced apartments", "telecommunications"];
 
