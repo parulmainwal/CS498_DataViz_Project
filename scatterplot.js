@@ -20,6 +20,8 @@ var divisionList = [
     var allDivisions = divisionList.map(function (d) { return d.name; });
     var allRegions = regionList.map(function (d) { return d.name; });
 
+    var colors = color = d3.scaleOrdinal(d3.schemeCategory10);
+
     var allPurposes = ["air traffic control tower", "belltower", "bridge", "casino", "commercial", "education", "exhibition", "government", "hospital", "hotel", "industrial", "library", "museum", "observation", "office", "other", "religious", "residential", "retail", "serviced apartments", "telecommunications"];
 
     var allDropdownOptions = ["All States", "Northeast", "Midwest", "South", "West", "Atlanta", "Boston", "Chicago", "Dallas", "Detroit", "Houston", "Jersey City", "Las Vegas", "Los Angeles", "Miami", "New York City", "Philadelphia", "Pittsburgh", "San Francisco", "Seattle"];
@@ -168,8 +170,9 @@ var divisionList = [
             .attr("cy", function (d) {
                 return yScatter(d.buildingHeight);
             })
-            .style("fill", allStatesColor)
-            .style("fill-opacity", dotFillOpacity)
+            //.style("fill", allStatesColor)
+            .style("fill", function(d) { return colors(d.main); })
+            //.style("fill-opacity", dotFillOpacity)
             .style("stroke", dotStroke)
             .style("stroke-width", dotStrokeWidth)
             .on("mouseover", showTooltip)
